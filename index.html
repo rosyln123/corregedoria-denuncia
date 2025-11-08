@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Corregedoria | PMESP</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cor_bg: '#0f172a',
+                        cor_panel: '#1e293b',
+                        cor_accent: '#3b82f6',
+                        cor_alert: '#ef4444',
+                        cor_success: '#10b981'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Ícones (Lucide) -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Fonte Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            background-color: #0f172a; 
+            background-image: radial-gradient(at 0% 0%, rgba(30, 41, 59, 0.5) 0px, transparent 50%), radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.8) 0px, transparent 50%); 
+            background-attachment: fixed; 
+        }
+        .glass { 
+            background: rgba(15, 23, 42, 0.8); /* Mais escuro para contraste */
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.05); 
+        }
+        /* Novo estilo de Input: Mais integrado e menos "quadrado branco" */
+        .input-std { 
+            @apply w-full bg-black/30 border-b-2 border-slate-700 px-4 py-4 text-slate-200 focus:border-cor_accent focus:bg-black/50 transition-all outline-none placeholder:text-slate-600 rounded-t-md; 
+        }
+        /* Select precisa de uma ajudinha extra para os options ficarem legíveis */
+        select.input-std option {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 10px;
+        }
+
+        .btn-primary { @apply bg-cor_accent hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-lg transition-all active:scale-95 flex items-center justify-center; }
+        .btn-danger { @apply bg-cor_alert hover:bg-red-600 text-white font-semibold py-3 px-6 rounded-lg transition-all active:scale-95 flex items-center justify-center; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+
+<body class="text-slate-300 font-sans min-h-screen flex flex-col">
+
+    <!-- NAV TOP -->
+    <nav class="glass sticky top-0 z-50 border-b border-slate-800/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center cursor-pointer hover:opacity-80 transition-opacity" onclick="showView('home')">
+                    <i data-lucide="shield-alert" class="w-8 h-8 text-cor_accent mr-3"></i>
+                    <div>
+                        <h1 class="text-white font-bold leading-tight tracking-wider">CORREGEDORIA</h1>
+                        <p class="text-[10px] text-slate-400 font-medium tracking-[0.2em] uppercase">Polícia Militar • Estado de São Paulo</p>
+                    </div>
+                </div>
+                <div class="hidden md:flex items-center space-x-1">
+                    <button onclick="showView('home')" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-all">Início</button>
+                    <button onclick="showView('consult')" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white hover:bg-white/5 rounded-md transition-all">Consultar Protocolo</button>
+                    <div class="h-6 w-px bg-slate-800 mx-2"></div>
+                    <button onclick="checkAdminAuth()" class="flex items-center px-4 py-2 text-sm font-medium text-cor_accent hover:text-blue-400 hover:bg-blue-500/10 rounded-md transition-all">
+                        <i data-lucide="lock" class="w-4 h-4 mr-2"></i> Área Restrita
+                    </button>
+                </div>
+                 <button onclick="showView('consult')" class="md:hidden p-2 text-slate-400 hover:text-white"><i data-lucide="search" class="w-6 h-6"></i></button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- MAIN CONTAINER -->
+    <main class="flex-grow max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
+
+        <!-- VIEW: HOME -->
+        <div id="view-home" class="animate-fade-in space-y-12">
+            <div class="text-center py-16 md:py-24">
+                <div class="inline-flex items-center px-4 py-2 bg-blue-500/10 text-cor_accent rounded-full text-sm font-medium mb-8 border border-blue-500/20">
+                    <span class="flex h-2 w-2 mr-2">
+                      <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-blue-400 opacity-75"></span>
+                      <span class="relative inline-flex rounded-full h-2 w-2 bg-blue-500"></span>
+                    </span>
+                    Sistema Operacional V3.3
+                </div>
+                <h2 class="text-4xl md:text-6xl font-extrabold text-white mb-6 tracking-tight">
+                    Canal Oficial de <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">Justiça e Integridade</span>
+                </h2>
+                <p class="text-xl text-slate-400 max-w-2xl mx-auto mb-10 leading-relaxed">
+                    Plataforma segura para reportar condutas irregulares. Sua identidade é preservada e toda denúncia é rigorosamente investigada.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                    <button onclick="showView('new-report')" class="btn-primary w-full sm:w-auto text-lg px-8 py-4 shadow-lg shadow-blue-500/20">
+                        <i data-lucide="file-plus-2" class="w-6 h-6 mr-2"></i>
+                        Nova Denúncia
+                    </button>
+                    <button onclick="showView('consult')" class="w-full sm:w-auto px-8 py-4 rounded-lg border border-slate-700 text-slate-300 font-semibold hover:bg-slate-800/50 transition-all flex items-center justify-center">
+                        <i data-lucide="search" class="w-5 h-5 mr-2"></i>
+                        Acompanhar Processo
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cards Informativos -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="glass p-8 rounded-2xl hover:border-cor_accent/30 transition-colors group">
+                    <div class="bg-blue-500/10 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="video" class="w-8 h-8 text-cor_accent"></i>
+                    </div>
+                    <h3 class="text-white text-xl font-bold mb-3">Provas Obrigatórias</h3>
+                    <p class="text-slate-400 leading-relaxed">Denúncias sem provas visuais (vídeo) serão arquivadas. Para RDM/VDM, mínimo de <strong class="text-slate-200">3 minutos</strong> de gravação.</p>
+                </div>
+                <div class="glass p-8 rounded-2xl hover:border-green-500/30 transition-colors group">
+                    <div class="bg-green-500/10 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                         <i data-lucide="shield-check" class="w-8 h-8 text-green-500"></i>
+                    </div>
+                    <h3 class="text-white text-xl font-bold mb-3">Sigilo Absoluto</h3>
+                    <p class="text-slate-400 leading-relaxed">Seus dados são visíveis apenas para a equipe da Corregedoria. O acusado não terá acesso à sua identidade.</p>
+                </div>
+                <div class="glass p-8 rounded-2xl hover:border-red-500/30 transition-colors group">
+                    <div class="bg-red-500/10 w-16 h-16 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                        <i data-lucide="alert-triangle" class="w-8 h-8 text-cor_alert"></i>
+                    </div>
+                    <h3 class="text-white text-xl font-bold mb-3">Falsa Comunicação</h3>
+                    <p class="text-slate-400 leading-relaxed">O uso indevido deste canal, trotes ou forjar provas resultará em banimento permanente do servidor.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: NOVA DENÚNCIA -->
+        <div id="view-new-report" class="hidden animate-fade-in">
+            <div class="max-w-3xl mx-auto glass rounded-3xl overflow-hidden shadow-2xl shadow-black/50">
+                <div class="bg-black/40 p-8 border-b border-slate-800">
+                    <h2 class="text-3xl font-bold text-white flex items-center">
+                        <div class="p-2 bg-cor_accent/20 rounded-lg mr-4">
+                             <i data-lucide="file-text" class="w-8 h-8 text-cor_accent"></i>
+                        </div>
+                        Formulário de Denúncia
+                    </h2>
+                    <p class="text-slate-400 mt-2 ml-16">Preencha todos os campos obrigatórios com atenção.</p>
+                </div>
+                
+                <form id="reportForm" class="p-8 space-y-10">
+                    
+                    <!-- Seção 1: Denunciante -->
+                    <div class="space-y-6">
+                        <h3 class="text-sm font-bold text-cor_accent uppercase tracking-widest flex items-center">
+                            <i data-lucide="user" class="w-4 h-4 mr-2"></i>
+                            Identificação do Denunciante
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 mb-2 block uppercase">Seu Passaporte (ID)*</label>
+                                <input type="number" id="reporter_id" required class="input-std" placeholder="Ex: 1024">
+                            </div>
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 mb-2 block uppercase">Seu Nome (Opcional)</label>
+                                <input type="text" id="reporter_name" class="input-std" placeholder="Ex: João Silva">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 2: Acusado -->
+                    <div class="space-y-6">
+                         <h3 class="text-sm font-bold text-cor_alert uppercase tracking-widest flex items-center">
+                            <i data-lucide="siren" class="w-4 h-4 mr-2"></i>
+                            Identificação do Acusado
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 mb-2 block uppercase">Passaporte (ID) do Oficial*</label>
+                                <input type="number" id="accused_id" required class="input-std" placeholder="Número do passaporte">
+                            </div>
+                             <div>
+                                <label class="text-xs font-semibold text-slate-500 mb-2 block uppercase">Guarnição/Batalhão*</label>
+                                <select id="accused_battalion" required class="input-std appearance-none">
+                                    <option value="" disabled selected>Selecione a guarnição...</option>
+                                    
+                                    <optgroup label="Comandos e Especiais">
+                                        <option value="ROTA">ROTA (Rondas Ostensivas Tobias de Aguiar)</option>
+                                        <option value="1_BAEP">1º BAEP (Ações Especiais)</option>
+                                        <option value="COE">COE (Comandos e Operações Especiais)</option>
+                                        <option value="GATE">GATE (Grupo de Ações Táticas Especiais)</option>
+                                        <option value="GRPAE">GRPAe (Águia/Aéreo)</option>
+                                    </optgroup>
+
+                                    <optgroup label="Choque e Tático">
+                                        <option value="1BPCHQ_ROCAM">1º BPChq - ROCAM (Motos)</option>
+                                        <option value="2BPCHQ_CHOQUE">2º BPChq - Choque/Eventos</option>
+                                        <option value="3BPCHQ_HUMAITA">3º BPChq - Humaitá</option>
+                                        <option value="FORCA_TATICA">Força Tática (Geral)</option>
+                                    </optgroup>
+
+                                    <optgroup label="Batalhões Metropolitanos (BPM/M)">
+                                        <option value="28BPM">28º BPM/M (Batalhão Solicitado)</option>
+                                        <option value="5BPM">5º BPM/M</option>
+                                        <option value="18BPM">18º BPM/M</option>
+                                        <option value="RADIOPATRULHA">Rádio Patrulha (Outros BPMs)</option>
+                                    </optgroup>
+
+                                    <optgroup label="Específicas">
+                                        <option value="RPMON">RPMon (Cavalaria)</option>
+                                        <option value="PRE">Polícia Rodoviária Estadual</option>
+                                        <option value="PA">Polícia Ambiental</option>
+                                        <option value="CORPO_BOMBEIROS">Corpo de Bombeiros (Se aplicável)</option>
+                                    </optgroup>
+
+                                    <optgroup label="Outros">
+                                        <option value="DESCONHECIDO">Não sei / Não identifiquei</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Seção 3: Detalhes e Provas -->
+                    <div class="space-y-6">
+                        <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest flex items-center">
+                            <i data-lucide="folder-open" class="w-4 h-4 mr-2"></i>
+                            Relato e Provas
+                        </h3>
+                        
+                        <div>
+                             <label class="text-xs font-semibold text-slate-500 mb-2 block uppercase">Infração Cometida*</label>
+                             <select id="infraction_type" required class="input-std">
+                                <option value="" disabled selected>Selecione o tipo...</option>
+                                <option value="Abuso de Autoridade">Abuso de Autoridade</option>
+                                <option value="RDM/VDM">RDM / VDM (Morte sem motivo)</option>
+                                <option value="Corrupcao">Corrupção / Quebra de Procedimento</option>
+                                <option value="AntiRP">Anti-RP / Fail RP</option>
+                                <option value="Toxicidade">Toxicidade / Ofensa OOC</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+
+                        <div class="bg-blue-500/5 border-l-4 border-cor_accent p-6 rounded-r-xl">
+                            <label class="text-sm font-bold text-blue-400 mb-2 flex items-center uppercase">
+                                <i data-lucide="link" class="w-4 h-4 mr-2"></i>
+                                Link das Provas (Vídeo)*
+                            </label>
+                            <p class="text-xs text-slate-400 mb-4 leading-relaxed">
+                                Cole o link direto (YouTube, Streamable, Medal). Mínimo de <strong>3 minutos</strong> para ações complexas.
+                            </p>
+                            <input type="url" id="evidence_link" required class="input-std !bg-black/40" placeholder="https://...">
+                        </div>
+
+                        <div>
+                            <label class="text-xs font-semibold text-slate-500 mb-2 block uppercase">Descrição Detalhada*</label>
+                            <textarea id="description" required rows="6" class="input-std resize-none" placeholder="Narre o ocorrido com detalhes, incluindo horários aproximados..."></textarea>
+                        </div>
+                    </div>
+
+                    <div class="pt-6">
+                        <button type="submit" id="submitBtn" class="btn-primary w-full text-lg h-16 shadow-xl shadow-blue-900/20 hover:shadow-blue-500/40">
+                            PROTOCOLAR DENÚNCIA
+                        </button>
+                        <p class="text-center text-xs text-slate-500 mt-4">
+                            Ao enviar, você confirma que todas as informações são verdadeiras sob pena de punição in-game.
+                        </p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- VIEW: SUCESSO -->
+        <div id="view-success" class="hidden animate-fade-in text-center py-20">
+             <div class="inline-flex bg-green-500/10 p-8 rounded-full mb-8 animate-pulse">
+                <i data-lucide="check" class="w-20 h-20 text-green-500"></i>
+            </div>
+            <h2 class="text-4xl font-bold text-white mb-4">Denúncia Recebida</h2>
+            <p class="text-slate-400 max-w-md mx-auto mb-10 text-lg">Sua denúncia foi registrada em nosso sistema e será analisada em breve por um oficial corregedor.</p>
+            
+            <div class="max-w-md mx-auto glass p-8 rounded-2xl mb-10 border border-cor_accent/30 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cor_accent to-transparent opacity-50"></div>
+                <p class="text-sm text-cor_accent font-bold uppercase tracking-widest mb-4">Seu número de protocolo</p>
+                <div class="bg-black/30 rounded-xl py-4 px-6 mb-4">
+                    <p id="generated-protocol" class="text-4xl font-mono font-bold text-white select-all tracking-wider">---</p>
+                </div>
+                <p class="text-xs text-slate-500 flex items-center justify-center">
+                    <i data-lucide="copy" class="w-3 h-3 mr-1"></i>
+                    Salve este número para consultas futuras.
+                </p>
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center gap-4">
+                <button onclick="showView('home')" class="px-8 py-4 rounded-lg bg-slate-800 text-white hover:bg-slate-700 transition-colors font-medium">Voltar ao Início</button>
+                <button onclick="showView('consult')" class="btn-primary px-8 py-4">Consultar Agora</button>
+            </div>
+        </div>
+
+        <!-- VIEW: CONSULTA PROTOCOLO -->
+        <div id="view-consult" class="hidden animate-fade-in max-w-2xl mx-auto mt-10">
+            <div class="glass rounded-3xl p-10 text-center mb-8 shadow-2xl shadow-black/50">
+                <div class="mb-8">
+                    <i data-lucide="search-check" class="w-16 h-16 text-cor_accent mx-auto mb-6 opacity-80"></i>
+                    <h2 class="text-3xl font-bold text-white mb-2">Consultar Andamento</h2>
+                    <p class="text-slate-400">Digite o protocolo recebido no momento da denúncia.</p>
+                </div>
+                <div class="flex gap-4 max-w-lg mx-auto">
+                    <input type="text" id="consult-protocol" class="input-std text-center font-mono uppercase text-xl !py-5 tracking-widest" placeholder="CDG-XXXX">
+                    <button onclick="consultProtocol()" class="btn-primary px-8 shadow-lg shadow-blue-500/20">
+                        <i data-lucide="arrow-right" class="w-6 h-6"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div id="consult-result" class="hidden glass rounded-3xl p-8 animate-fade-in-up border border-slate-700/50">
+                <!-- Resultados serão injetados aqui via JS -->
+            </div>
+        </div>
+
+        <!-- VIEW: LOGIN ADMIN -->
+        <div id="view-admin-login" class="hidden animate-fade-in max-w-md mx-auto py-20">
+             <div class="glass rounded-3xl p-10 text-center border-red-500/20 shadow-2xl shadow-red-900/10">
+                <div class="bg-red-500/10 w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                    <i data-lucide="shield-alert" class="w-10 h-10 text-cor_alert"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-white mb-8">Acesso Restrito Corregedoria</h2>
+                <form onsubmit="adminLogin(event)" class="space-y-6">
+                    <div class="relative">
+                        <input type="password" id="admin-pass" class="input-std text-center text-lg !py-5 tracking-widest" placeholder="SENHA DE ACESSO">
+                         <i data-lucide="lock" class="w-5 h-5 text-slate-500 absolute left-4 top-1/2 -translate-y-1/2 opacity-50"></i>
+                    </div>
+                    <button type="submit" class="btn-danger w-full h-14 text-lg shadow-lg shadow-red-900/20">ENTRAR NO SISTEMA</button>
+                </form>
+                <p class="text-xs text-slate-500 mt-6 flex items-center justify-center">
+                    <i data-lucide="alert-octagon" class="w-3 h-3 mr-1"></i>
+                    IP Registrado. Tentativas não autorizadas serão punidas.
+                </p>
+            </div>
+        </div>
+
+        <!-- VIEW: PAINEL ADMIN -->
+        <div id="view-admin-panel" class="hidden animate-fade-in">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-white flex items-center">
+                        <i data-lucide="layout-dashboard" class="w-8 h-8 mr-3 text-cor_accent"></i>
+                        Painel de Controle
+                    </h2>
+                    <p class="text-slate-400 mt-1">Visão geral de todas as denúncias registradas.</p>
+                </div>
+                <button onclick="adminLogout()" class="px-6 py-3 text-sm text-red-400 hover:text-white border border-red-900/50 rounded-xl hover:bg-cor_alert transition-all flex items-center">
+                    <i data-lucide="log-out" class="w-4 h-4 mr-2"></i>
+                    Sair do Sistema
+                </button>
+            </div>
+
+            <!-- Lista de Denúncias -->
+            <div class="glass rounded-3xl overflow-hidden border border-slate-800 shadow-2xl">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-400">
+                        <thead class="text-xs uppercase bg-black/40 text-slate-300 font-bold tracking-wider">
+                            <tr>
+                                <th class="px-6 py-5">Protocolo / Data</th>
+                                <th class="px-6 py-5">Acusado (ID)</th>
+                                <th class="px-6 py-5">Guarnição</th>
+                                <th class="px-6 py-5">Infração</th>
+                                <th class="px-6 py-5">Status</th>
+                                <th class="px-6 py-5 text-right">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-reports-list" class="divide-y divide-slate-800/50">
+                            <!-- Linhas preenchidas via JS -->
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center text-slate-500 flex flex-col items-center">
+                                    <i data-lucide="loader-2" class="w-6 h-6 animate-spin mb-2 opacity-50"></i>
+                                    Carregando base de dados...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW: ADMIN DETAILS (NOVA - SUBSTITUI ALERTS/PROMPTS) -->
+        <div id="view-admin-details" class="hidden animate-fade-in">
+             <div class="mb-8">
+                <button onclick="showView('admin-panel')" class="text-slate-400 hover:text-white flex items-center transition-colors">
+                    <i data-lucide="arrow-left" class="w-5 h-5 mr-2"></i> Voltar ao Painel
+                </button>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <!-- Coluna da Esquerda: Detalhes da Denúncia -->
+                <div class="lg:col-span-2 space-y-8">
+                    <div class="glass p-8 rounded-3xl border-cor_accent/20">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <p class="text-xs text-slate-500 uppercase tracking-widest font-bold">Protocolo</p>
+                                <h2 id="detail-protocol" class="text-3xl font-mono font-bold text-white tracking-wider">---</h2>
+                            </div>
+                             <div id="detail-status-badge" class="px-4 py-2 rounded-lg border text-sm font-bold uppercase">
+                                ---
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-6 mb-8">
+                             <div class="bg-black/30 p-4 rounded-xl">
+                                <p class="text-xs text-slate-500 uppercase font-bold mb-1">Denunciante (ID)</p>
+                                <p id="detail-reporter" class="text-white font-medium text-lg">---</p>
+                            </div>
+                             <div class="bg-black/30 p-4 rounded-xl">
+                                <p class="text-xs text-slate-500 uppercase font-bold mb-1">Acusado (ID)</p>
+                                <p id="detail-accused" class="text-white font-medium text-lg">---</p>
+                            </div>
+                             <div class="bg-black/30 p-4 rounded-xl">
+                                <p class="text-xs text-slate-500 uppercase font-bold mb-1">Guarnição</p>
+                                <p id="detail-battalion" class="text-white font-medium">---</p>
+                            </div>
+                             <div class="bg-black/30 p-4 rounded-xl">
+                                <p class="text-xs text-slate-500 uppercase font-bold mb-1">Infração</p>
+                                <p id="detail-infraction" class="text-white font-medium">---</p>
+                            </div>
+                        </div>
+                        <div class="mb-6">
+                            <p class="text-xs text-slate-500 uppercase font-bold mb-2">Descrição do Ocorrido</p>
+                            <div id="detail-description" class="bg-black/30 p-6 rounded-xl text-slate-300 leading-relaxed whitespace-pre-wrap max-h-60 overflow-y-auto">---</div>
+                        </div>
+                         <div>
+                            <p class="text-xs text-slate-500 uppercase font-bold mb-2">Provas Apresentadas</p>
+                            <div class="flex items-center bg-black/30 p-4 rounded-xl">
+                                <i data-lucide="link" class="w-5 h-5 text-cor_accent mr-3"></i>
+                                <a id="detail-proofs-link" href="#" target="_blank" class="text-cor_accent hover:underline truncate flex-1">---</a>
+                                <button onclick="window.open(document.getElementById('detail-proofs-link').href, '_blank')" class="text-xs bg-cor_accent/10 text-cor_accent px-3 py-1 rounded hover:bg-cor_accent/20 ml-4">
+                                    ABRIR
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Coluna da Direita: Ações de Gestão -->
+                <div class="space-y-6">
+                    <div class="glass p-6 rounded-3xl">
+                        <h3 class="text-white font-bold mb-6 flex items-center text-lg">
+                            <i data-lucide="settings-2" class="w-5 h-5 mr-2 text-cor_accent"></i>
+                            Ações do Corregedor
+                        </h3>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 mb-2 block uppercase">Atualizar Status</label>
+                                <select id="edit-status" class="input-std !py-3 !text-sm">
+                                    <option value="Pendente">Pendente</option>
+                                    <option value="Em Análise">Em Análise</option>
+                                    <option value="Concluído">Concluído</option>
+                                    <option value="Arquivado">Arquivado</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 mb-2 block uppercase">Nota Oficial (Pública)</label>
+                                <textarea id="edit-notes" rows="4" class="input-std !py-3 !text-sm resize-none" placeholder="Escreva um parecer para o denunciante..."></textarea>
+                            </div>
+
+                            <button id="btn-save-changes" onclick="saveAdminChanges()" class="btn-primary w-full py-3 shadow-lg">
+                                <i data-lucide="save" class="w-5 h-5 mr-2"></i> Salvar Alterações
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="glass p-6 rounded-3xl border-red-900/30">
+                        <h3 class="text-red-400 font-bold mb-4 flex items-center text-sm uppercase">
+                            <i data-lucide="trash-2" class="w-4 h-4 mr-2"></i>
+                            Zona de Perigo
+                        </h3>
+                        <p class="text-xs text-slate-500 mb-4">A exclusão é permanente e não pode ser desfeita.</p>
+                        <button id="btn-delete-report" onclick="confirmDeleteReport()" class="w-full py-3 bg-red-500/10 text-red-500 hover:bg-cor_alert hover:text-white rounded-lg transition-all font-medium text-sm flex items-center justify-center border border-red-500/20">
+                            Excluir Registro Permanentemente
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- DB STATUS FOOTER -->
+    <footer class="fixed bottom-0 left-0 w-full p-2 bg-black/80 text-[10px] text-slate-500 flex justify-between px-4 z-50 pointer-events-none">
+        <span>Portal Corregedoria v3.3 (Config Real)</span>
+        <span id="db-status" class="flex items-center"><i class="w-2 h-2 rounded-full bg-yellow-500 mr-2"></i> Inicializando...</span>
+    </footer>
+
+    <!-- Firebase & App Logic -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // --- CONFIGURAÇÃO DO FIREBASE ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDiRwJOhiMTk3Aonn1ZcLz0vMU1Ov19dng",
+            authDomain: "corregedoriapmesp-ed9db.firebaseapp.com",
+            projectId: "corregedoriapmesp-ed9db",
+            storageBucket: "corregedoriapmesp-ed9db.firebasestorage.app",
+            messagingSenderId: "133579040285",
+            appId: "1:133579040285:web:ddad3d9ebc8a2e1d5108f4"
+        };
+
+        // Tenta usar a config real se estivermos no ambiente de chat, senão usa a genérica (que falhará graciosamente)
+        let app, db, auth, COLL_NAME;
+        try {
+            const configToUse = (typeof __firebase_config !== 'undefined') ? JSON.parse(__firebase_config) : firebaseConfig;
+            app = initializeApp(configToUse);
+            db = getFirestore(app);
+            auth = getAuth(app);
+            // Usa um ID de app fixo se não estiver no ambiente de chat, baseado no ID do seu projeto para organização
+            const appIdStr = (typeof __app_id !== 'undefined') ? __app_id : 'corregedoria_ed9db';
+            COLL_NAME = `artifacts/${appIdStr}/public/data/denuncias_v3`;
+        } catch (e) {
+            console.error("Erro fatal na inicialização do Firebase:", e);
+            alert("Erro crítico: Não foi possível conectar ao banco de dados. Verifique a configuração do Firebase no código.");
+        }
+
+        let isAdmin = false;
+        let unsubscribeAdmin = null;
+        let currentManagingDocId = null; 
+
+        // --- AUTH ---
+        async function authenticateUser() {
+            if (!auth) return;
+            try {
+                 // Tenta usar token customizado APENAS se estivermos no ambiente de chat que o fornece
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await import("https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js")
+                        .then(({ signInWithCustomToken }) => signInWithCustomToken(auth, __initial_auth_token));
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch (e) { console.error("Auth Error:", e); if (!auth.currentUser) await signInAnonymously(auth).catch(err => console.error("Anonymous auth failed:", err)); }
+        }
+        authenticateUser();
+        if (auth) {
+            onAuthStateChanged(auth, (user) => {
+                document.getElementById('db-status').innerHTML = user ? '<i class="w-2 h-2 rounded-full bg-green-500 mr-2"></i> Firebase Conectado' : '<i class="w-2 h-2 rounded-full bg-red-500 mr-2"></i> Desconectado';
+            });
+        }
+        function ensureAuth() { return new Promise((resolve, reject) => { if (!auth) return reject("Firebase não inicializado"); if (auth.currentUser) return resolve(auth.currentUser); const unsub = onAuthStateChanged(auth, u => { if (u) { unsub(); resolve(u); } }, reject); }); }
+
+        // --- ROUTER ---
+        window.showView = (viewName) => {
+            ['home', 'new-report', 'success', 'consult', 'admin-login', 'admin-panel', 'admin-details'].forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+            document.getElementById(`view-${viewName}`).classList.remove('hidden');
+            window.scrollTo(0,0);
+            lucide.createIcons();
+        }
+        showView('home');
+
+        function generateProtocol() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let code = '';
+            for (let i = 0; i < 4; i++) code += chars.charAt(Math.floor(Math.random() * chars.length));
+            return `CDG-${code}`;
+        }
+
+        // --- FORM SUBMIT ---
+        document.getElementById('reportForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            const originalText = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '<i data-lucide="loader-2" class="animate-spin mr-2"></i> Processando...'; lucide.createIcons();
+            try {
+                const user = await ensureAuth();
+                const reportData = {
+                    protocol: generateProtocol(),
+                    reporter_id: document.getElementById('reporter_id').value,
+                    reporter_name: document.getElementById('reporter_name').value || 'Anônimo',
+                    accused_id: document.getElementById('accused_id').value,
+                    accused_battalion: document.getElementById('accused_battalion').value,
+                    infraction: document.getElementById('infraction_type').value,
+                    proofs: document.getElementById('evidence_link').value,
+                    description: document.getElementById('description').value,
+                    status: 'Pendente',
+                    admin_notes: '',
+                    timestamp: serverTimestamp(),
+                    uid: user.uid
+                };
+                await addDoc(collection(db, COLL_NAME), reportData);
+                document.getElementById('generated-protocol').textContent = reportData.protocol;
+                e.target.reset();
+                showView('success');
+            } catch (error) { 
+                console.error(error);
+                alert("Erro de conexão. Se você estiver rodando fora do ambiente de teste, certifique-se de ter configurado seu projeto Firebase real no código."); 
+            } finally { btn.disabled = false; btn.innerHTML = originalText; }
+        });
+
+        // --- CONSULT ---
+        window.consultProtocol = async () => {
+            const protocolInput = document.getElementById('consult-protocol').value.trim().toUpperCase();
+            const resultDiv = document.getElementById('consult-result');
+            if (!protocolInput) return;
+            resultDiv.innerHTML = '<div class="text-center py-8"><i data-lucide="loader-2" class="animate-spin w-10 h-10 mx-auto text-cor_accent"></i></div>';
+            resultDiv.classList.remove('hidden'); lucide.createIcons();
+            try {
+                await ensureAuth();
+                const snapshot = await getDocs(query(collection(db, COLL_NAME), where("protocol", "==", protocolInput)));
+                if (snapshot.empty) {
+                     resultDiv.innerHTML = `<div class="text-center text-cor_alert py-6"><i data-lucide="x-circle" class="w-16 h-16 mx-auto mb-4 opacity-80"></i><h3 class="text-2xl font-bold text-white mb-2">Protocolo Inexistente</h3></div>`;
+                } else {
+                    const data = snapshot.docs[0].data();
+                    let sC = 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20', sI = 'clock';
+                    if(data.status==='Em Análise'){sC='text-blue-400 bg-blue-500/10 border-blue-500/20';sI='search';}
+                    if(data.status==='Concluído'){sC='text-green-500 bg-green-500/10 border-green-500/20';sI='check-circle-2';}
+                    if(data.status==='Arquivado'){sC='text-slate-400 bg-slate-500/10 border-slate-500/20';sI='archive';}
+                    resultDiv.innerHTML = `
+                        <div class="flex justify-between items-center mb-8 pb-8 border-b border-slate-700/50">
+                            <div><span class="text-xs text-slate-500 uppercase font-bold">Protocolo</span><h3 class="text-3xl font-mono font-bold text-white tracking-wider">${data.protocol}</h3></div>
+                            <div class="flex items-center ${sC} px-6 py-3 rounded-xl border"><i data-lucide="${sI}" class="w-6 h-6 mr-3"></i><div><p class="text-xs opacity-70 uppercase font-bold">Status</p><span class="font-bold uppercase text-lg">${data.status}</span></div></div>
+                        </div>
+                        <div class="space-y-6">
+                             <div class="grid grid-cols-2 gap-6 text-sm bg-black/20 p-6 rounded-xl">
+                                <div><p class="text-slate-500 uppercase text-xs font-bold mb-1">Acusado (ID)</p><p class="text-white font-medium text-lg">${data.accused_id}</p></div>
+                                <div><p class="text-slate-500 uppercase text-xs font-bold mb-1">Infração</p><p class="text-white font-medium text-lg">${data.infraction}</p></div>
+                            </div>
+                            ${data.admin_notes?`<div class="bg-cor_accent/5 p-6 rounded-xl mt-6 border-l-4 border-cor_accent"><p class="text-sm text-cor_accent font-bold uppercase mb-3 flex items-center"><i data-lucide="message-square" class="w-4 h-4 mr-2"></i>Nota Oficial</p><p class="text-slate-200 text-base leading-relaxed">${data.admin_notes}</p></div>`:''}
+                        </div>`;
+                }
+                lucide.createIcons();
+            } catch (err) { resultDiv.innerHTML = '<p class="text-cor_alert text-center">Erro de conexão.</p>'; }
+        }
+
+        // --- ADMIN ---
+        window.checkAdminAuth = () => { if (isAdmin) { showView('admin-panel'); } else { showView('admin-login'); } }
+        window.adminLogin = async (e) => {
+            e.preventDefault();
+            try {
+                await ensureAuth();
+                if (document.getElementById('admin-pass').value === 'pmesp190') { 
+                    isAdmin = true; document.getElementById('admin-pass').value = ''; startAdminListener(); showView('admin-panel');
+                } else { alert("Senha Inválida"); }
+            } catch (e) { alert("Erro de conexão com o banco de dados."); }
+        }
+        window.adminLogout = () => { isAdmin = false; if (unsubscribeAdmin) unsubscribeAdmin(); showView('home'); }
+
+        async function startAdminListener() {
+            const tbody = document.getElementById('admin-reports-list');
+            try {
+                unsubscribeAdmin = onSnapshot(query(collection(db, COLL_NAME)), (snapshot) => {
+                    if (snapshot.empty) { tbody.innerHTML = '<tr><td colspan="6" class="p-12 text-center text-slate-500">Nenhuma denúncia.</td></tr>'; return; }
+                    let reports = []; snapshot.forEach(doc => reports.push({ id: doc.id, ...doc.data() }));
+                    reports.sort((a, b) => (b.timestamp?.toMillis ? b.timestamp.toMillis() : 0) - (a.timestamp?.toMillis ? a.timestamp.toMillis() : 0));
+                    tbody.innerHTML = '';
+                    reports.forEach(data => {
+                        const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleDateString('pt-BR') : '---';
+                        let sC = 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
+                        if(data.status==='Em Análise') sC='bg-blue-500/10 text-blue-400 border-blue-500/20';
+                        if(data.status==='Concluído') sC='bg-green-500/10 text-green-500 border-green-500/20';
+                        if(data.status==='Arquivado') sC='bg-slate-500/10 text-slate-400 border-slate-500/20';
+                        const tr = document.createElement('tr'); tr.className = "hover:bg-white/5 transition-colors";
+                        tr.innerHTML = `<td class="px-6 py-4"><div class="font-mono font-bold text-white">${data.protocol}</div><div class="text-xs text-slate-500 mt-1">${date}</div></td><td class="px-6 py-4 text-white font-medium">${data.accused_id}</td><td class="px-6 py-4"><span class="px-3 py-1 bg-slate-900/50 rounded-lg text-xs font-medium border border-slate-700">${data.accused_battalion}</span></td><td class="px-6 py-4 text-slate-300">${data.infraction}</td><td class="px-6 py-4"><span class="px-3 py-1 rounded-full text-xs font-bold uppercase ${sC} border">${data.status}</span></td><td class="px-6 py-4 text-right"><button onclick="openAdminDetails('${data.id}')" class="text-sm text-cor_accent hover:text-white hover:bg-cor_accent py-2 px-4 rounded-lg transition-all font-medium">Gerenciar</button></td>`;
+                        tbody.appendChild(tr);
+                    });
+                }, (error) => {
+                    tbody.innerHTML = '<tr><td colspan="6" class="p-12 text-center text-cor_alert font-bold">Erro de conexão. Verifique sua configuração do Firebase.</td></tr>';
+                });
+            } catch (e) { tbody.innerHTML = '<tr><td colspan="6" class="p-12 text-center text-cor_alert font-bold">Erro fatal ao conectar.</td></tr>'; }
+        }
+
+        // --- NOVO SISTEMA DE GESTÃO (SEM PROMPT/ALERT) ---
+        window.openAdminDetails = async (docId) => {
+            await ensureAuth();
+            currentManagingDocId = docId;
+            const docSnap = await getDoc(doc(db, COLL_NAME, docId));
+            if (!docSnap.exists()) return;
+            const data = docSnap.data();
+
+            // Popular a view de detalhes
+            document.getElementById('detail-protocol').textContent = data.protocol;
+            document.getElementById('detail-reporter').textContent = `${data.reporter_name} (#${data.reporter_id})`;
+            document.getElementById('detail-accused').textContent = data.accused_id;
+            document.getElementById('detail-battalion').textContent = data.accused_battalion;
+            document.getElementById('detail-infraction').textContent = data.infraction;
+            document.getElementById('detail-description').textContent = data.description;
+            document.getElementById('detail-proofs-link').textContent = data.proofs;
+            document.getElementById('detail-proofs-link').href = data.proofs;
+            document.getElementById('edit-notes').value = data.admin_notes || '';
+            document.getElementById('edit-status').value = data.status;
+
+            // Atualizar badge de status
+            const badge = document.getElementById('detail-status-badge');
+            badge.className = 'px-4 py-2 rounded-lg border text-sm font-bold uppercase ';
+            if(data.status==='Pendente') badge.className += 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
+            if(data.status==='Em Análise') badge.className += 'text-blue-400 bg-blue-500/10 border-blue-500/20';
+            if(data.status==='Concluído') badge.className += 'text-green-500 bg-green-500/10 border-green-500/20';
+            if(data.status==='Arquivado') badge.className += 'text-slate-400 bg-slate-500/10 border-slate-500/20';
+            badge.textContent = data.status;
+
+            // Reset do botão de delete
+            const delBtn = document.getElementById('btn-delete-report');
+            delBtn.textContent = 'Excluir Registro Permanentemente';
+            delBtn.classList.remove('bg-red-600', 'text-white');
+            delBtn.classList.add('bg-red-500/10', 'text-red-500');
+            delBtn.dataset.confirm = 'false';
+
+            showView('admin-details');
+        }
+
+        window.saveAdminChanges = async () => {
+            if (!currentManagingDocId) return;
+            const btn = document.getElementById('btn-save-changes');
+            btn.disabled = true; btn.innerHTML = '<i data-lucide="loader-2" class="animate-spin mr-2"></i> Salvando...'; lucide.createIcons();
+            try {
+                await updateDoc(doc(db, COLL_NAME, currentManagingDocId), {
+                    status: document.getElementById('edit-status').value,
+                    admin_notes: document.getElementById('edit-notes').value
+                });
+                // Reabre para atualizar visualmente o badge
+                openAdminDetails(currentManagingDocId);
+            } catch (e) { console.error(e); alert("Erro ao salvar. Verifique a conexão."); } finally { btn.disabled = false; btn.innerHTML = '<i data-lucide="save" class="w-5 h-5 mr-2"></i> Salvar Alterações'; lucide.createIcons(); }
+        }
+
+        window.confirmDeleteReport = async () => {
+            if (!currentManagingDocId) return;
+            const btn = document.getElementById('btn-delete-report');
+            if (btn.dataset.confirm === 'false') {
+                btn.textContent = 'TEM CERTEZA? CLIQUE NOVAMENTE PARA APAGAR.';
+                btn.classList.remove('bg-red-500/10', 'text-red-500');
+                btn.classList.add('bg-red-600', 'text-white');
+                btn.dataset.confirm = 'true';
+                return;
+            }
+            try {
+                await deleteDoc(doc(db, COLL_NAME, currentManagingDocId));
+                showView('admin-panel');
+            } catch (e) { console.error(e); alert("Erro ao excluir."); }
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
